@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<title>Mangoê · Manga e abacaxi temperados</title>
+<meta name="description" content="Manga e abacaxi temperados em potes de 250 ml e 500 ml. Monte seu pedido e envie pelo WhatsApp.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="images/logo-small.webp" type="image/webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root{--g:#0F2A1D;--g2:#17402B;--cream:#FFF6DC;--y:#F5B800;--o:#F08A24;--mut:#5C6B5F;--line:#E7DDB8;box-sizing:border-box}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--cream);color:var(--g);font:16px/1.55 "DM Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;margin:0;line-height:1.15}
+a{color:inherit}.wrap{max-width:1000px;margin:auto;padding:0 20px}
+header{position:sticky;top:0;z-index:5;background:var(--g);color:var(--cream)}
+header .wrap{display:flex;align-items:center;gap:14px;height:60px}
+header img{width:40px;height:40px;border-radius:50%}header b{font:800 20px "Bricolage Grotesque",sans-serif;flex:1}
+header a{text-decoration:none;font-size:14px;opacity:.9}
+.btn{display:inline-block;border:0;border-radius:99px;background:var(--y);color:var(--g);font:700 16px "DM Sans",sans-serif;padding:12px 22px;cursor:pointer;text-decoration:none;text-align:center}
+.btn.s{padding:8px 16px;font-size:14px}.btn.g{background:var(--g);color:var(--cream)}.btn[disabled]{opacity:.45;cursor:not-allowed}
+.hero{position:relative;overflow:hidden;background:linear-gradient(#02290C,#02330D 45%,#022F0E);color:var(--cream);text-align:center;min-height:clamp(560px,92vh,860px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px 56px}
+.hero .c{position:absolute;z-index:0;pointer-events:none;width:clamp(110px,24vw,260px);height:auto}
+.c.bl{width:clamp(130px,30vw,440px)}.c.tr,.c.br{width:clamp(100px,22vw,244px)}
+.c.tl{top:0;left:0;-webkit-mask-image:radial-gradient(ellipse farthest-side at 0 0,#000 76%,transparent 100%);mask-image:radial-gradient(ellipse farthest-side at 0 0,#000 76%,transparent 100%)}
+.c.tr{top:0;right:0;-webkit-mask-image:radial-gradient(ellipse farthest-side at 100% 0,#000 76%,transparent 100%);mask-image:radial-gradient(ellipse farthest-side at 100% 0,#000 76%,transparent 100%)}
+.c.bl{bottom:0;left:0;-webkit-mask-image:radial-gradient(ellipse farthest-side at 0 100%,#000 76%,transparent 100%);mask-image:radial-gradient(ellipse farthest-side at 0 100%,#000 76%,transparent 100%)}
+.c.br{bottom:0;right:0;-webkit-mask-image:radial-gradient(ellipse farthest-side at 100% 100%,#000 76%,transparent 100%);mask-image:radial-gradient(ellipse farthest-side at 100% 100%,#000 76%,transparent 100%)}
+.lg{position:relative;z-index:1;margin:0}
+.lg img{display:block;width:clamp(260px,34vw,420px);height:auto;-webkit-mask-image:radial-gradient(circle closest-side,#000 93%,transparent 100%);mask-image:radial-gradient(circle closest-side,#000 93%,transparent 100%)}
+.hero h2,.hero p,.hero .btn{position:relative;z-index:1}.hero h2{font-size:clamp(26px,5vw,44px);margin:6px 0 8px}.hero p{max-width:480px;margin:0 auto 22px;opacity:.92}
+section{padding:48px 0}h2{font-size:clamp(26px,5vw,34px);margin-bottom:6px}.sub{color:var(--mut);margin:0 0 22px}
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.card h3{font-size:22px}.price{display:flex;gap:10px}.price span{flex:1;background:var(--cream);border-radius:12px;padding:8px 10px;text-align:center;font-size:14px}.price b{display:block;font-size:18px}
+.dark{background:var(--g2);color:var(--cream)}.dark .sub{color:#C9D8C8}
+.box{background:#fff;color:var(--g);border-radius:20px;padding:20px;margin-bottom:16px}
+.row{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+label.t{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+select,input[type=text],input[type=number],textarea{width:100%;font:inherit;color:var(--g);background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips label{cursor:pointer}.chips input{position:absolute;opacity:0}
+.chips span{display:block;padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:var(--cream);font-size:14px}
+.chips input:checked+span{background:var(--y);border-color:var(--y);font-weight:700}
+.chips input:focus-visible+span{outline:2px solid var(--g);outline-offset:2px}
+.item{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.item small{color:var(--mut);display:block}.x{border:0;background:none;font-size:22px;cursor:pointer;color:var(--mut)}
+.tot{display:flex;justify-content:space-between;font:800 22px "Bricolage Grotesque",sans-serif;margin:14px 0}
+.steps{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.steps div{padding:6px 0}.steps b{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--y);margin-bottom:8px}
+footer{background:var(--g);color:var(--cream);text-align:center;padding:30px 20px;font-size:14px}
+.hide{display:none}.note{font-size:13px;color:var(--mut)}
+:focus-visible{outline:2px solid var(--o);outline-offset:2px}
+</style></head><body>
+<header><div class="wrap"><img src="images/logo-small.webp" alt="Logo Mangoê"><b>Mangoê</b><a href="#cardapio">Cardápio</a><a href="#pedido">Pedido</a></div></header>
+<div class="hero"><img class="c tl" src="images/corner-tl.webp" alt=""><img class="c tr" src="images/corner-tr.webp" alt=""><img class="c bl" src="images/corner-bl.webp" alt=""><img class="c br" src="images/corner-br.webp" alt="">
+<h1 class="lg"><img src="images/logo.webp" alt="Mangoê · manga e abacaxi temperados"></h1><h2>A mistura que vicia</h2><p>Manga e abacaxi temperados, no ponto e no tempero que você escolher.</p><a class="btn" href="#pedido">Montar meu pedido</a></div>
+
+<section id="cardapio"><div class="wrap"><h2>Cardápio</h2><p class="sub">Potes de 250 ml e 500 ml. Os temperos estão inclusos no preço.</p><div class="cards" id="cards"></div></div></section>
+
+<section id="pedido" class="dark"><div class="wrap"><h2>Monte seu pedido</h2><p class="sub">Escolha, adicione ao pedido e envie pelo WhatsApp. Você pode combinar vários potes.</p>
+<div class="box"><div class="row">
+<div><label class="t" for="sabor">Fruta</label><select id="sabor"></select></div>
+<div><label class="t" for="tam">Tamanho</label><select id="tam"></select></div>
+<div><label class="t" for="qtd">Quantidade</label><input id="qtd" type="number" min="1" max="50" value="1"></div>
+<div id="matBox"><label class="t" for="mat">Ponto da manga</label><select id="mat"></select></div></div>
+<p><label class="t">Temperos (escolha quantos quiser)</label></p><div class="chips" id="temp"></div>
+<p><label class="t" for="obs">Observação deste pote (opcional)</label><input type="text" id="obs" placeholder="Ex.: pouca pimenta"></p>
+<button class="btn" id="add" type="button">Adicionar ao pedido</button></div>
+<div class="box"><h3>Seu pedido</h3><div id="cart"></div><div class="tot"><span>Total</span><span id="total">R$ 0,00</span></div>
+<div class="row"><div><label class="t" for="nome">Seu nome</label><input id="nome" type="text"></div>
+<div><label class="t" for="ent">Como receber</label><select id="ent"><option>Entrega</option><option>Retirada</option></select></div></div>
+<p id="endBox"><label class="t" for="end">Endereço e referência</label><textarea id="end" rows="2"></textarea></p>
+<button class="btn" id="send" type="button" disabled>Enviar pedido pelo WhatsApp</button>
+<p class="note">O pedido só é confirmado depois que a Mangoê responder no WhatsApp. A taxa de entrega e o prazo combinamos na conversa.</p></div></div></section>
+
+<section><div class="wrap"><h2>Como pedir</h2><div class="steps"><div><b>1</b><h3>Escolha</h3><p>Fruta, tamanho, ponto da manga e temperos.</p></div><div><b>2</b><h3>Envie</h3><p>Toque em enviar e a mensagem já abre pronta no WhatsApp.</p></div><div><b>3</b><h3>Receba</h3><p>Confirmamos o pedido, o valor da entrega e o prazo.</p></div></div></div></section>
+
+<footer><p><b>Mangoê</b> · Manga e abacaxi temperados</p><p><a href="https://wa.me/5537991222354" target="_blank" rel="noopener">Falar no WhatsApp</a></p></footer>
+<script>
+let WA='5537991222354';
+let MENU={manga:{n:'Manga',d:'Manga selecionada, no ponto que você preferir.',mat:true,p:{250:15,500:20}},abacaxi:{n:'Abacaxi',d:'Abacaxi fresquinho, doce e temperado.',mat:false,p:{250:15,500:20}},misto:{n:'Misto',d:'Manga e abacaxi juntos no mesmo pote.',mat:true,p:{250:15,500:20}}};
+let MAT=['Verde','De vez','Madura'];
+let TEMP=['Sal','Limão','Lemon pepper','Chimichurri','Páprica defumada','Páprica picante','Pimenta-do-reino','Molho de pimenta','Tempero mexicano','Canela','Mel','Leite condensado','Calda Fini'];
+const $=s=>document.querySelector(s),R=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let cart=[];
+function build(){$('#cards').innerHTML=Object.entries(MENU).map(([k,m])=>`<div class="card"><h3>${m.n}</h3><p>${m.d}</p><div class="price">${Object.entries(m.p).map(([t,v])=>`<span>${t} ml<b>${R(v)}</b></span>`).join('')}</div><button class="btn s g" data-k="${k}" type="button">Pedir este</button></div>`).join('');
+$('#sabor').innerHTML=Object.entries(MENU).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join('');
+$('#mat').innerHTML=MAT.map(m=>`<option>${m}</option>`).join('');
+$('#temp').innerHTML=TEMP.map((t,i)=>`<label><input type="checkbox" value="${t}"><span>${t}</span></label>`).join('');
+opts()}
+function opts(){const m=MENU[$('#sabor').value];$('#tam').innerHTML=Object.entries(m.p).map(([t,v])=>`<option value="${t}">${t} ml · ${R(v)}</option>`).join('');$('#matBox').classList.toggle('hide',!m.mat)}
+function draw(){const tot=cart.reduce((a,i)=>a+i.q*i.v,0);
+$('#cart').innerHTML=cart.length?cart.map((i,x)=>`<div class="item"><div><b>${i.q}x ${i.n} ${i.t} ml</b><small>${[i.mat&&'Ponto: '+i.mat,i.tp.length?'Temperos: '+i.tp.join(', '):'Sem tempero',i.obs].filter(Boolean).join(' · ')}</small></div><div>${R(i.q*i.v)} <button class="x" data-x="${x}" type="button" aria-label="Remover">×</button></div></div>`).join(''):'<p class="note">Nenhum pote adicionado ainda.</p>';
+$('#total').textContent=R(tot);$('#send').disabled=!cart.length}
+$('#sabor').onchange=opts;
+$('#cards').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#sabor').value=b.dataset.k;opts();location.hash='pedido'};
+$('#add').onclick=()=>{const k=$('#sabor').value,m=MENU[k],t=$('#tam').value,q=Math.max(1,Math.min(50,parseInt($('#qtd').value)||1));
+cart.push({n:m.n,t,q,v:m.p[t],mat:m.mat?$('#mat').value:'',tp:[...document.querySelectorAll('#temp input:checked')].map(i=>i.value),obs:$('#obs').value.trim()});
+document.querySelectorAll('#temp input').forEach(i=>i.checked=false);$('#obs').value='';$('#qtd').value=1;draw()};
+$('#cart').onclick=e=>{const b=e.target.closest('.x');if(b){cart.splice(+b.dataset.x,1);draw()}};
+$('#ent').onchange=()=>$('#endBox').classList.toggle('hide',$('#ent').value=='Retirada');
+$('#send').onclick=()=>{const tot=cart.reduce((a,i)=>a+i.q*i.v,0),L=['Olá, Mangoê! Quero fazer um pedido:',''];
+cart.forEach((i,x)=>L.push((x+1)+') '+i.q+'x '+i.n+' '+i.t+' ml'+(i.mat?' (ponto: '+i.mat+')':'')+' - '+R(i.q*i.v),'   Temperos: '+(i.tp.join(', ')||'sem tempero')+(i.obs?'\n   Obs: '+i.obs:'')));
+L.push('','Total dos potes: '+R(tot));if($('#nome').value.trim())L.push('Nome: '+$('#nome').value.trim());
+L.push($('#ent').value=='Retirada'?'Vou retirar':'Entrega: '+($('#end').value.trim()||'(informo o endereço na conversa)'));
+window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(L.join('\n')),'_blank')};
+const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable_g4gdE7lepqwJHC1vh0E51Q_HpQCdQ6G';
+async function q(p){const r=await fetch(SB+p,{headers:{apikey:KEY}});if(!r.ok)throw 0;return r.json()}
+async function load(){try{const[pr,ma,to,ss]=await Promise.all([q('products?select=slug,name,description,has_maturation,product_prices(size_ml,price,active)&order=sort'),q('maturations?select=name&order=sort'),q('toppings?select=name&order=sort'),q('site_settings?select=key,value')]);
+const m={};pr.forEach(p=>{const pp={};p.product_prices.filter(x=>x.active).sort((a,b)=>a.size_ml-b.size_ml).forEach(x=>pp[x.size_ml]=+x.price);if(Object.keys(pp).length)m[p.slug]={n:p.name,d:p.description,mat:p.has_maturation,p:pp}});
+if(Object.keys(m).length)MENU=m;if(ma.length)MAT=ma.map(x=>x.name);if(to.length)TEMP=to.map(x=>x.name);const w=ss.find(x=>x.key=='whatsapp');if(w)WA=w.value;build();draw()}catch(e){}}
+build();draw();load();
+</script></body></html>
