@@ -48,6 +48,7 @@ select,input[type=text],input[type=number],textarea{width:100%;font:inherit;colo
 footer{background:var(--g);color:var(--cream);text-align:center;padding:30px 20px;font-size:14px}
 .hide{display:none}.note{font-size:13px;color:var(--mut)}
 :focus-visible{outline:2px solid var(--o);outline-offset:2px}
+.closed{position:fixed;inset:0;z-index:999;background:#1f3a22;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}.closed .bx{max-width:420px}.closed img{width:150px;max-width:60%;margin-bottom:14px}.closed h2{font:800 28px "Bricolage Grotesque",sans-serif;margin:0 0 10px}.closed p{margin:0 0 18px;line-height:1.5;font-size:17px}.closed button{font:inherit;font-weight:700;border:0;border-radius:99px;padding:12px 26px;background:#FFD23F;color:#1f3a22;cursor:pointer}
 </style></head><body>
 <header><div class="wrap"><img src="images/logo-small.webp" alt="Logo Mangoê"><b>Mangoê</b><a href="#cardapio">Cardápio</a><a href="#pedido">Pedido</a></div></header>
 <div class="hero"><img class="c tl" src="images/corner-tl.webp" alt=""><img class="c tr" src="images/corner-tr.webp" alt=""><img class="c bl" src="images/corner-bl.webp" alt=""><img class="c br" src="images/corner-br.webp" alt="">
@@ -135,6 +136,11 @@ const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable
 async function q(p){const r=await fetch(SB+p,{headers:{apikey:KEY}});if(!r.ok)throw 0;return r.json()}
 async function load(){try{const[pr,ma,to,ss,nb]=await Promise.all([q('products?select=slug,name,description,has_maturation,product_prices(size_ml,price,active)&order=sort'),q('maturations?select=name&order=sort'),q('toppings?select=name&order=sort'),q('site_settings?select=key,value'),q('neighborhoods?select=name,delivery_zones(name,fee)&active=eq.true&order=name')]);
 const m={};pr.forEach(p=>{const pp={};p.product_prices.filter(x=>x.active).sort((a,b)=>a.size_ml-b.size_ml).forEach(x=>pp[x.size_ml]=+x.price);if(Object.keys(pp).length)m[p.slug]={n:p.name,d:p.description,mat:p.has_maturation,p:pp}});
-if(Object.keys(m).length)MENU=m;if(ma.length)MAT=ma.map(x=>x.name);if(to.length)TEMP=to.map(x=>x.name);const w=ss.find(x=>x.key=='whatsapp');if(w)WA=w.value;NB=nb.filter(x=>x.delivery_zones).map(x=>({name:x.name,fee:x.delivery_zones.fee==null?null:+x.delivery_zones.fee}));build();draw()}catch(e){}}
+if(Object.keys(m).length)MENU=m;if(ma.length)MAT=ma.map(x=>x.name);if(to.length)TEMP=to.map(x=>x.name);const w=ss.find(x=>x.key=='whatsapp');if(w)WA=w.value;const so=ss.find(x=>x.key=='store_open'),cm=ss.find(x=>x.key=='closed_message');closedScreen(!!so&&String(so.value).trim().toLowerCase()=='false',cm&&cm.value);NB=nb.filter(x=>x.delivery_zones).map(x=>({name:x.name,fee:x.delivery_zones.fee==null?null:+x.delivery_zones.fee}));build();draw()}catch(e){}}
+function closedScreen(c,msg){let e=document.getElementById('closed');if(!c){if(e)e.remove();document.body.style.overflow='';return}
+if(!e){e=document.createElement('div');e.id='closed';e.className='closed';e.setAttribute('role','alertdialog');document.body.appendChild(e)}
+const t=document.createElement('div');t.className='bx';t.innerHTML='<img src="images/logo.webp" alt="Mangoê"><h2>Estamos fechados</h2><p></p><button type="button">Voltar</button>';t.querySelector('p').textContent=msg||'Estamos fechados no momento. Volte mais tarde!';
+t.querySelector('button').onclick=()=>{if(history.length>1)history.back();else location.reload()};e.replaceChildren(t);document.body.style.overflow='hidden'}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
 build();draw();load();
 </script></body></html>
