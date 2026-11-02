@@ -123,7 +123,7 @@ const outro=en&&$('#bairro').value=='__outro',b=en?(outro?$('#bairroTxt').value.
 const payload={name:nome,phone:tel,type:en?'entrega':'retirada',street:$('#rua').value.trim(),number:$('#num').value.trim(),neighborhood:b,neighborhood_other:outro,complement:$('#comp').value.trim(),reference:$('#ref').value.trim(),items:cart.map(i=>({slug:i.k,size:+i.t,qty:i.q,mat:i.mat||null,toppings:i.tp,note:i.obs}))};
 btn.disabled=true;btn.textContent='Enviando...';const w=window.open('','_blank');let r=null;
 try{const res=await fetch(SB+'rpc/create_order',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p:payload})});
-if(res.ok){r=await res.json()}else{const j=await res.json().catch(()=>({}));if(res.status==400&&j.message){er.textContent=j.message;if(w)w.close();btn.disabled=false;btn.textContent=lab;return}}}catch(e){}
+if(res.ok){r=await res.json()}else{const j=await res.json().catch(()=>({}));if(res.status==400&&j.message){er.textContent=j.message;if(w)w.close();if(/fechada/i.test(j.message))load();btn.disabled=false;btn.textContent=lab;return}}}catch(e){}
 const tot=r?+r.items_total:cart.reduce((a,i)=>a+i.q*i.v,0),f=r?(r.fee_pending?null:+r.delivery_fee):fee(),L=['Olá, Mangoê! Quero fazer um pedido'+(r?' (nº '+r.number+')':'')+':',''];
 cart.forEach((i,x)=>L.push((x+1)+') '+i.q+'x '+i.n+' '+i.t+' ml'+(i.mat?' (ponto: '+i.mat+')':'')+' - '+R(i.q*i.v),'   Temperos: '+(i.tp.join(', ')||'sem tempero')+(i.obs?'\n   Obs: '+i.obs:'')));
 L.push('','Total dos potes: '+R(tot));
