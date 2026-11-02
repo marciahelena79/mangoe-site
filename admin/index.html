@@ -46,9 +46,9 @@ $('#new').onclick=async()=>{const{error}=await sb.auth.signUp({email:$('#em').va
 async function boot(){const{data:{session}}=await sb.auth.getSession();if(!session)return login();user=session.user.email;const{data:ok,error}=await sb.rpc('is_admin');
 if(error||!ok){$('#app').innerHTML=`<div class="login card"><h1>Sem permissão</h1><p>A conta <b>${esc(user)}</b> não está autorizada como administradora.</p><button class="btn g" id="out">Sair</button></div>`;$('#out').onclick=async()=>{await sb.auth.signOut();login()};return}
 shell();await refresh();clearInterval(timer);timer=setInterval(()=>{if(tab=='pedidos')refresh(true)},30000)}
-function shell(){$('#app').innerHTML=`<header><div class="in"><b>Mangoê</b><div class="tabs"><button data-t="pedidos">Pedidos</button><button data-t="fin">Financeiro</button></div><span class="k" style="color:#C9D8C8">${esc(user)}</span><button class="btn s g" id="out">Sair</button></div></header><main id="main"></main>`;
+function shell(){$('#app').innerHTML=`<header><div class="in"><b>Mangoê</b><div class="tabs"><button data-t="pedidos">Pedidos</button><button data-t="fin">Financeiro</button><button data-t="card">Cardápio</button><button data-t="frete">Frete</button><button data-t="custos">Custos</button></div><span class="k" style="color:#C9D8C8">${esc(user)}</span><button class="btn s g" id="out">Sair</button></div></header><main id="main"></main>`;
 $('#out').onclick=async()=>{await sb.auth.signOut();login()};document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;sel=null;refresh()})}
-async function refresh(quiet){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));const[a,b]=range();
+async function refresh(quiet){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));if(EDV[tab]){await EDV[tab]();return}const[a,b]=range();
 const{data,error}=await sb.from('orders').select('*,order_items(*)').gte('created_at',a).lt('created_at',b).order('created_at',{ascending:false}).limit(2000);
 if(error){$('#main').innerHTML='<div class="card msg">Erro ao carregar: '+esc(error.message)+'</div>';return}
 orders=data;const n=orders.filter(o=>o.status=='novo').length;document.title=(n?'('+n+') ':'')+'Mangoê · Administração';
@@ -94,5 +94,66 @@ $('#main').innerHTML=filt()+`<span class="k">Considera os pedidos do site que n�
 <div class="card"><h3>Produtos</h3>${tb(['Produto','Qtd','Faturamento','Custo estimado','Lucro estimado','% do faturamento'],prods.map(([k,p])=>[esc(k),p.q,R(p.v),R(p.c),R(p.v-p.c),N(T.prod?p.v/T.prod*100:0)+'%']))}</div>
 <div class="two"><div class="card"><h3>Temperos mais pedidos</h3>${tops.map(t=>`<p style="margin:6px 0">${esc(t[0])}: ${t[1]}<span class="bar" style="display:block"><i style="width:${t[1]/mp*100}%"></i></span></p>`).join('')||'<p class="k">Sem dados.</p>'}</div>
 <div class="card"><h3>Bairros que mais pedem</h3>${tb(['Bairro','Pedidos','Taxas'],nbs.map(([k,v])=>[esc(k),v.n,R(v.v)]))}</div></div>`;bindPer()}
-sb.auth.onAuthStateChange(()=>{});boot();
+
+/* ===== Edição: cardápio, frete e custos ===== */
+const EDV={};const sv='<span class="msg" id="sv"></span>';
+const MSG=(t,ok)=>{const m=$('#sv');if(m){m.textContent=t;m.className='msg '+(ok?'ok':'')}};
+const slugify=n=>n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const I=(tbl,m,col,v,ty,o={})=>{const a=`data-tbl="${tbl}" data-m="${esc(JSON.stringify(m))}" data-col="${col}" data-ty="${ty}"${o.req?' data-req="1"':''}`;
+if(ty=='bool')return`<input type="checkbox" ${a} ${v?'checked':''}>`;
+if(ty=='sel')return`<select ${a}>${o.opts.map(x=>`<option value="${esc(x[0])}" ${x[0]==v?'selected':''}>${esc(x[1])}</option>`).join('')}</select>`;
+return`<input type="text" ${a} value="${esc(v??'')}" style="width:${o.w||90}px"${ty=='num'||ty=='numnull'?' inputmode="decimal"':''}${o.ph?` placeholder="${o.ph}"`:''}>`};
+const fail=(r)=>{const e=r.find(x=>x&&x.error);if(e){$('#main').innerHTML='<div class="card msg">Erro ao carregar: '+esc(e.error.message)+'</div>';return true}};
+EDV.card=async()=>{const r=await Promise.all([sb.from('products').select('*').order('sort').order('name'),sb.from('product_prices').select('*'),sb.from('maturations').select('*').order('sort').order('name'),sb.from('toppings').select('*').order('sort').order('name'),sb.from('site_settings').select('*')]);if(fail(r))return;
+const[pr,pp,ma,to,ss]=r.map(x=>x.data),wa=(ss.find(x=>x.key=='whatsapp')||{value:''}).value;
+const cell=(p,s)=>{const z=pp.find(x=>x.product_id==p.id&&x.size_ml==s);return z?`<td>${I('product_prices',{product_id:p.id,size_ml:s},'price',z.price,'num',{w:64})}</td><td>${I('product_prices',{product_id:p.id,size_ml:s},'active',z.active,'bool')}</td>`:'<td></td><td></td>'};
+const list=(tbl,rows,act)=>rows.map(x=>`<tr><td>${I(tbl,{id:x.id},'name',x.name,'text',{req:1,w:200})}</td><td>${I(tbl,{id:x.id},'active',x.active,'bool')}</td><td class="r"><button class="btn s d" data-act="del${act}" data-id="${x.id}" data-n="${esc(x.name)}">Remover</button></td></tr>`).join('');
+$('#main').innerHTML=`<p class="k">Alterações são salvas ao sair do campo e aparecem no site na hora. ${sv}</p>
+<div class="card"><div class="row"><h3 style="flex:1">Produtos e preços</h3><button class="btn s" data-act="addprod">+ Novo produto</button></div><div class="sc"><table><tr><th>Nome</th><th>Descrição</th><th>Ponto da manga</th><th>Ativo</th><th>250 ml R$</th><th>On</th><th>500 ml R$</th><th>On</th><th></th></tr>${pr.map(p=>`<tr><td>${I('products',{id:p.id},'name',p.name,'text',{req:1,w:120})}</td><td>${I('products',{id:p.id},'description',p.description,'text',{w:240})}</td><td>${I('products',{id:p.id},'has_maturation',p.has_maturation,'bool')}</td><td>${I('products',{id:p.id},'active',p.active,'bool')}</td>${cell(p,250)}${cell(p,500)}<td><button class="btn s d" data-act="delprod" data-id="${p.id}" data-n="${esc(p.name)}">Remover</button></td></tr>`).join('')}</table></div><p class="k">Para tirar um item do cardápio sem perder o histórico, desmarque "Ativo". Em "On" você liga ou desliga cada tamanho.</p></div>
+<div class="two"><div class="card"><div class="row"><h3 style="flex:1">Temperos</h3><button class="btn s" data-act="addtop">+ Novo tempero</button></div><div class="sc"><table><tr><th>Nome</th><th>Ativo</th><th></th></tr>${list('toppings',to,'top')}</table></div></div>
+<div><div class="card"><div class="row"><h3 style="flex:1">Ponto da manga</h3><button class="btn s" data-act="addmat">+ Novo ponto</button></div><table><tr><th>Nome</th><th>Ativo</th><th></th></tr>${list('maturations',ma,'mat')}</table></div>
+<div class="card"><h3>WhatsApp do pedido</h3><p class="k">Com código do país e DDD, só números. Ex.: 5537991222354</p>${I('site_settings',{key:'whatsapp'},'value',wa,'wa',{w:160})}</div></div></div>`};
+EDV.frete=async()=>{const r=await Promise.all([sb.from('delivery_zones').select('*').order('sort'),sb.from('neighborhoods').select('*').order('name')]);if(fail(r))return;const[Z,NBs]=r.map(x=>x.data);
+const zo=Z.map(z=>[z.id,z.name]);
+$('#main').innerHTML=`<p class="k">Alterações são salvas ao sair do campo. Deixe o valor vazio para "a combinar". ${sv}</p>
+<div class="card"><div class="row"><h3 style="flex:1">Zonas e valores</h3><button class="btn s" data-act="addzone">+ Nova zona</button></div><table><tr><th>Zona</th><th>Frete R$</th><th>Ativa</th><th>Bairros</th><th></th></tr>${Z.map(z=>`<tr><td>${I('delivery_zones',{id:z.id},'name',z.name,'text',{req:1,w:200})}</td><td>${I('delivery_zones',{id:z.id},'fee',z.fee,'numnull',{w:70,ph:'a combinar'})}</td><td>${I('delivery_zones',{id:z.id},'active',z.active,'bool')}</td><td>${NBs.filter(n=>n.zone_id==z.id).length}</td><td><button class="btn s d" data-act="delzone" data-id="${z.id}" data-n="${esc(z.name)}" data-c="${NBs.filter(n=>n.zone_id==z.id).length}">Remover</button></td></tr>`).join('')}</table></div>
+<div class="card"><h3>Bairros</h3><div class="row"><input id="nbq" type="text" placeholder="Buscar bairro..." style="width:200px"><select id="nbz"><option value="">Todas as zonas</option>${zo.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('')}</select></div>
+<div class="row"><input id="nbn" type="text" placeholder="Novo bairro" style="width:200px"><select id="nbzz">${zo.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('')}</select><button class="btn s" data-act="addnb">+ Adicionar bairro</button></div><div id="nbl"></div></div>`;
+const draw=()=>{const q=$('#nbq').value.trim().toLowerCase(),zf=$('#nbz').value,rows=NBs.filter(n=>(!zf||n.zone_id==zf)&&(!q||n.name.toLowerCase().includes(q)));
+$('#nbl').innerHTML=`<p class="k">${rows.length} bairro(s)${rows.length>150?' · mostrando 150, use a busca':''}</p><div class="sc"><table><tr><th>Bairro</th><th>Zona</th><th>Ativo</th><th></th></tr>${rows.slice(0,150).map(n=>`<tr><td>${I('neighborhoods',{id:n.id},'name',n.name,'text',{req:1,w:230})}</td><td>${I('neighborhoods',{id:n.id},'zone_id',n.zone_id,'sel',{opts:zo})}</td><td>${I('neighborhoods',{id:n.id},'active',n.active,'bool')}</td><td><button class="btn s d" data-act="delnb" data-id="${n.id}" data-n="${esc(n.name)}">Remover</button></td></tr>`).join('')}</table></div>`};
+$('#nbq').oninput=draw;$('#nbz').onchange=draw;draw()};
+EDV.custos=async()=>{const r=await Promise.all([sb.from('product_costs').select('*'),sb.from('products').select('id,name,sort').order('sort'),sb.from('topping_costs').select('*,toppings(name)'),sb.from('settings').select('value').eq('key','cfg').maybeSingle()]);if(fail(r))return;
+const[pc,pr,tc]=r.slice(0,3).map(x=>x.data),cfg=(r[3].data||{}).value||{},nm={};pr.forEach(p=>nm[p.id]=p.name);
+const cf=(k,l)=>`<label class="k" style="display:flex;justify-content:space-between;gap:8px">${l}<input type="text" inputmode="decimal" style="width:80px" data-cfg="${k}" data-ty="num" value="${esc(cfg[k]??'')}"></label>`;
+const M=(c,k)=>I('product_costs',{product_id:c.product_id,size_ml:c.size_ml},k,c[k],'num',{w:70});
+$('#main').innerHTML=`<p class="k">Estes custos alimentam o resultado estimado da aba Financeiro. ${sv}</p>
+<div class="card"><h3>Frutas, impostos e entrega</h3><p class="k">O rendimento já considera cascas e perdas (não há perda separada).</p><div class="grid">${cf('kgM','Manga, R$/kg')}${cf('rM','Rendimento manga, %')}${cf('kgA','Abacaxi, R$/kg')}${cf('rA','Rendimento abacaxi, %')}${cf('imp','Impostos, %')}${cf('outras','Outras variáveis, %')}${cf('entProp','Entrega própria, R$/pedido')}</div></div>
+<div class="card"><h3>Custo por produto</h3><div class="sc"><table><tr><th>Produto</th><th>Tamanho</th><th>g manga</th><th>g abacaxi</th><th>Embalagem R$</th><th>Outros R$</th></tr>${pc.sort((a,b)=>(nm[a.product_id]||'').localeCompare(nm[b.product_id]||'')||a.size_ml-b.size_ml).map(c=>`<tr><td>${esc(nm[c.product_id]||'?')}</td><td>${c.size_ml} ml</td><td>${M(c,'grams_mango')}</td><td>${M(c,'grams_pineapple')}</td><td>${M(c,'packaging')}</td><td>${M(c,'other_cost')}</td></tr>`).join('')}</table></div></div>
+<div class="card"><h3>Custo dos temperos</h3><p class="k">Custo por dose = preço pago ÷ quantidade da embalagem × dose. Cada tempero escolhido no pedido entra no custo.</p><div class="sc"><table><tr><th>Tempero</th><th>Un.</th><th>Embalagem</th><th>Preço pago R$</th><th>Dose 250 ml</th><th>Dose 500 ml</th></tr>${tc.sort((a,b)=>(a.toppings?.name||'').localeCompare(b.toppings?.name||'')).map(t=>{const T=(k,w)=>I('topping_costs',{topping_id:t.topping_id},k,t[k],'num',{w:w||70});return`<tr><td>${esc(t.toppings?.name||'?')}</td><td>${I('topping_costs',{topping_id:t.topping_id},'unit',t.unit,'text',{w:40})}</td><td>${T('pack_qty')}</td><td>${T('pack_price')}</td><td>${T('dose_250',60)}</td><td>${T('dose_500',60)}</td></tr>`}).join('')}</table></div></div>`};
+$('#app').addEventListener('change',async e=>{const t=e.target,ty=t.dataset.ty;if(!ty)return;let v;
+if(ty=='bool')v=t.checked;else if(ty=='num'||ty=='numnull'){const s=t.value.trim();if(s===''&&ty=='numnull')v=null;else{v=parseFloat(s.replace(',','.'));if(!(v>=0)){MSG('Valor inválido',0);return}}}
+else if(ty=='wa'){v=t.value.replace(/\D/g,'');if(v.length<12||v.length>13){MSG('Número inválido: use código do país e DDD (ex.: 5537991222354)',0);return}t.value=v}
+else{v=t.value.trim();if(t.dataset.req&&!v){MSG('Este campo é obrigatório',0);return}}
+if(t.dataset.cfg){const{data}=await sb.from('settings').select('value').eq('key','cfg').single(),c=data?data.value:{};c[t.dataset.cfg]=v;const{error}=await sb.from('settings').update({value:c}).eq('key','cfg');COST=null;MSG(error?error.message:'Salvo ✓',!error);return}
+if(!t.dataset.tbl)return;let q=sb.from(t.dataset.tbl).update({[t.dataset.col]:v});const m=JSON.parse(t.dataset.m);for(const k in m)q=q.eq(k,m[k]);const{error}=await q;
+if(['product_costs','topping_costs'].includes(t.dataset.tbl))COST=null;MSG(error?error.message:'Salvo ✓',!error)});
+$('#app').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id,n=b.dataset.n;let res=null;
+const num=s=>{const f=parseFloat(String(s).replace(',','.'));return f>=0?f:NaN};
+if(a=='addprod'){const nome=(prompt('Nome do novo produto:')||'').trim();if(!nome)return;const sl=slugify(nome)||('produto-'+Date.now());
+const{data,error}=await sb.from('products').insert({slug:sl,name:nome,description:'',has_maturation:false,active:false,sort:Date.now()%100000000}).select().single();if(error){alert('Erro: '+error.message);return}
+await sb.from('product_prices').insert([250,500].map(s=>({product_id:data.id,size_ml:s,price:0,active:true})));await sb.from('product_costs').insert([250,500].map(s=>({product_id:data.id,size_ml:s})));
+alert('Produto criado como inativo. Defina os preços e marque "Ativo" para ele aparecer no site.')}
+else if(a=='delprod'){if(!confirm('Remover "'+n+'" e seus preços? O histórico de pedidos é mantido. Para só esconder, desmarque "Ativo".'))return;res=await sb.from('products').delete().eq('id',id)}
+else if(a=='addtop'){const nome=(prompt('Nome do novo tempero:')||'').trim();if(!nome)return;const{data,error}=await sb.from('toppings').insert({name:nome,sort:Date.now()%100000000}).select().single();if(error){alert('Erro: '+error.message);return}await sb.from('topping_costs').insert({topping_id:data.id})}
+else if(a=='deltop'){if(!confirm('Remover o tempero "'+n+'"?'))return;res=await sb.from('toppings').delete().eq('id',id)}
+else if(a=='addmat'){const nome=(prompt('Nome do novo ponto:')||'').trim();if(!nome)return;res=await sb.from('maturations').insert({name:nome,sort:Date.now()%100000000})}
+else if(a=='delmat'){if(!confirm('Remover o ponto "'+n+'"?'))return;res=await sb.from('maturations').delete().eq('id',id)}
+else if(a=='addzone'){const nome=(prompt('Nome da nova zona (ex.: Zona 8 · 13-16 km):')||'').trim();if(!nome)return;const f=(prompt('Valor do frete em reais (deixe vazio para "a combinar"):')||'').trim();const fee=f===''?null:num(f);if(Number.isNaN(fee)){alert('Valor inválido');return}
+res=await sb.from('delivery_zones').insert({name:nome,fee,sort:Date.now()%100000000})}
+else if(a=='delzone'){if(!confirm('Remover a zona "'+n+'"? Os '+b.dataset.c+' bairros dela também serão removidos. Para só desativar, desmarque "Ativa".'))return;res=await sb.from('delivery_zones').delete().eq('id',id)}
+else if(a=='addnb'){const nome=$('#nbn').value.trim();if(!nome){MSG('Digite o nome do bairro',0);return}res=await sb.from('neighborhoods').insert({name:nome,zone_id:$('#nbzz').value})}
+else if(a=='delnb'){if(!confirm('Remover o bairro "'+n+'"?'))return;res=await sb.from('neighborhoods').delete().eq('id',id)}
+else return;
+if(res&&res.error){alert('Erro: '+res.error.message);return}if(a.startsWith('del')||a.startsWith('add'))COST=null;await refresh()});
+boot();
 </script></body></html>
