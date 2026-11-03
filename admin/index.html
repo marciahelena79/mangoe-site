@@ -111,7 +111,7 @@ $('#main').innerHTML=filt()+`<span class="k">Considera os pedidos do site que n�
 let AC=null,SND=true,SEEN=null,STM=null,LASTB=0;try{SND=localStorage.getItem('snd')!='0'}catch(e){}
 function unlock(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume()}catch(e){}}
 ['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,unlock,{passive:true}));
-function beep(){unlock();if(!AC)return;LASTB=Date.now();const t=AC.currentTime;[[880,0],[1175,.22],[880,.44],[1175,.66]].forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.4,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.2);o.start(t+d);o.stop(t+d+.22)})}
+function beep(){unlock();if(!AC)return;LASTB=Date.now();const t=AC.currentTime,m=AC.createGain();m.gain.value=1;m.connect(AC.destination);[[880,0],[1175,.3],[880,.6],[1175,.9],[880,1.4],[1175,1.7],[880,2],[1175,2.3]].forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='square';o.frequency.value=f;o.connect(g);g.connect(m);g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.9,t+d+.02);g.gain.setValueAtTime(.9,t+d+.2);g.gain.linearRampToValueAtTime(0,t+d+.27);o.start(t+d);o.stop(t+d+.3)})}
 function sndBtn(){const b=$('#snd');if(b)b.textContent=SND?'🔔 Som ligado':'🔕 Som desligado'}
 async function checkNew(){try{const{data,error}=await sb.from('orders').select('id').eq('status','novo');if(error||!data)return;const ids=new Set(data.map(o=>o.id));
 if(SEEN===null){SEEN=ids;if(ids.size&&SND)beep();return}
