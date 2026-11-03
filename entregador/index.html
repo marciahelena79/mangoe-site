@@ -45,7 +45,7 @@ return `<div class="card ${o.status=='entregue'?'done':''}"><div class="top"><sp
 <div class="addr">${E(o.street)}, nº ${E(o.num)}<br>${E(o.nb)}</div>
 ${o.comp?`<div class="sub">Compl.: ${E(o.comp)}</div>`:''}${o.ref?`<div class="sub">Ref.: ${E(o.ref)}</div>`:''}
 <div class="sub"><b>${E(o.name)}</b></div>
-<div class="items">${(o.items||[]).map(E).join('<br>')}</div>${pay}
+<div class="sub">Taxa de entrega: <b>${o.fee_pending||o.fee==null?'a combinar':+o.fee===0?'Grátis':R(o.fee)}</b></div><div class="items">${(o.items||[]).map(E).join('<br>')}</div>${pay}
 <div class="row"><a class="btn p" href="${maps}" target="_blank" rel="noopener">🧭 Abrir rota</a><a class="btn" href="tel:+${ph.length<=11?'55'+ph:ph}">📞 Ligar</a><a class="btn" href="${wa}" target="_blank" rel="noopener">WhatsApp</a></div>
 ${act?`<div class="row">${act}</div>`:''}</div>`}
 async function load(){if(!T){$('#m').innerHTML='<p class="msg">Link incompleto. Peça o link correto.</p>';return}
