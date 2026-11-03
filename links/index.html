@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<title>Mangoê · Links</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Mangoê: manga e abacaxi temperados. Peça pelo site, pelo iFood ou fale com a gente.">
+<meta property="og:title" content="Mangoê"><meta property="og:description" content="Manga e abacaxi temperados. Peça pelo site, pelo iFood ou fale com a gente.">
+<meta property="og:image" content="https://mangoe.vercel.app/images/logo.webp">
+<link rel="icon" href="../images/logo-small.webp" type="image/webp">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#1F2916;color:#E3B654;font:700 17px Lora,Georgia,serif;display:flex;flex-direction:column;align-items:center;padding:44px 20px 28px}
+.logo{width:112px;height:112px;border-radius:50%;object-fit:cover;display:block}
+h1{margin:12px 0 28px;font:600 18px Lora,Georgia,serif;letter-spacing:.02em}
+.l{width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px;flex:1}
+.l a{display:block;text-align:center;text-decoration:none;color:#E3B654;background:#2E3823;border:2px solid #E3B654;border-radius:6px;padding:25px 16px;text-transform:uppercase;transition:background .15s}
+.l a:hover,.l a:focus-visible{background:#3A472C;outline:none}
+.l a[hidden]{display:none}
+footer{margin-top:28px;font-size:13px;font-weight:600;opacity:.7}
+</style></head><body>
+<img class="logo" src="../images/logo-small.webp" alt="Mangoê">
+<h1>@mangoe_fresh</h1>
+<nav class="l">
+<a href="../">Peça pelo site</a>
+<a href="" id="ifood" hidden target="_blank" rel="noopener">Peça pelo iFood</a>
+<a href="../cardapio/">Cardápio</a>
+<a href="https://wa.me/5537991222354" target="_blank" rel="noopener">Fale com a gente</a>
+</nav>
+<footer>Divinópolis · MG</footer>
+<script>
+const IFOOD='';
+if(IFOOD){const a=document.getElementById('ifood');a.href=IFOOD;a.hidden=false}
+</script>
+</body></html>
