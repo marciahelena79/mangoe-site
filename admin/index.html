@@ -47,8 +47,8 @@ $('#go').onclick=async()=>{const{error}=await sb.auth.signInWithPassword({email:
 $('#new').onclick=async()=>{const{error}=await sb.auth.signUp({email:$('#em').value.trim(),password:$('#pw').value,options:{emailRedirectTo:location.origin+'/admin/'}});if(error)$('#lm').textContent=error.message;else login('Conta criada. Abra o e-mail que você recebeu, confirme e depois volte aqui para entrar.',true)}}
 async function boot(){const{data:{session}}=await sb.auth.getSession();if(!session)return login();user=session.user.email;const{data:ok,error}=await sb.rpc('is_admin');
 if(error||!ok){$('#app').innerHTML=`<div class="login card"><h1>Sem permissão</h1><p>A conta <b>${esc(user)}</b> não está autorizada como administradora.</p><button class="btn g" id="out">Sair</button></div>`;$('#out').onclick=async()=>{await sb.auth.signOut();login()};return}
-shell();await refresh();clearInterval(timer);timer=setInterval(()=>{if(tab=='pedidos')refresh(true)},30000)}
-function shell(){$('#app').innerHTML=`<header><div class="in"><b>Mangoê</b><div class="tabs"><button data-t="pedidos">Pedidos</button><button data-t="fin">Site</button><button data-t="ifood">iFood</button><button data-t="res">Resultado</button><button data-t="desp">Despesas e planos</button><button data-t="card">Cardápio</button><button data-t="frete">Frete</button><button data-t="ent">Entregador</button><button data-t="custos">Custos</button></div><button class="btn s" id="loja" style="background:#fff;color:#444">Loja…</button><span class="k" style="color:#C9D8C8">${esc(user)}</span><button class="btn s g" id="out">Sair</button></div></header><main id="main"></main>`;
+shell();soundInit();await refresh();clearInterval(timer);timer=setInterval(()=>{if(tab=='pedidos')refresh(true)},30000)}
+function shell(){$('#app').innerHTML=`<header><div class="in"><b>Mangoê</b><div class="tabs"><button data-t="pedidos">Pedidos</button><button data-t="fin">Site</button><button data-t="ifood">iFood</button><button data-t="res">Resultado</button><button data-t="desp">Despesas e planos</button><button data-t="card">Cardápio</button><button data-t="frete">Frete</button><button data-t="ent">Entregador</button><button data-t="custos">Custos</button></div><button class="btn s g" id="snd" type="button">🔔 Som ligado</button><button class="btn s" id="loja" style="background:#fff;color:#444">Loja…</button><span class="k" style="color:#C9D8C8">${esc(user)}</span><button class="btn s g" id="out">Sair</button></div></header><main id="main"></main>`;
 $('#out').onclick=async()=>{await sb.auth.signOut();login()};document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;sel=null;refresh()});storeInit()}
 let STORE=true;
 function storeDraw(){const b=$('#loja');if(!b)return;b.textContent=STORE?'● Loja aberta':'● Loja FECHADA';b.style.background=STORE?'#CDEFD8':'#F6D3D0';b.style.color=STORE?'#1F6B3A':'#B3261E';b.title=STORE?'Clique para fechar a loja':'Clique para reabrir a loja'}
@@ -108,6 +108,17 @@ $('#main').innerHTML=filt()+`<span class="k">Considera os pedidos do site que n�
 <div class="card"><h3>Bairros que mais pedem</h3>${tb(['Bairro','Pedidos','Taxas'],nbs.map(([k,v])=>[esc(k),v.n,R(v.v)]))}</div></div>`;bindPer()}
 
 /* ===== Edição: cardápio, frete e custos ===== */
+let AC=null,SND=true,SEEN=null,STM=null,LASTB=0;try{SND=localStorage.getItem('snd')!='0'}catch(e){}
+function unlock(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume()}catch(e){}}
+['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,unlock,{passive:true}));
+function beep(){unlock();if(!AC)return;LASTB=Date.now();const t=AC.currentTime;[[880,0],[1175,.22],[880,.44],[1175,.66]].forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.4,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.2);o.start(t+d);o.stop(t+d+.22)})}
+function sndBtn(){const b=$('#snd');if(b)b.textContent=SND?'🔔 Som ligado':'🔕 Som desligado'}
+async function checkNew(){try{const{data,error}=await sb.from('orders').select('id').eq('status','novo');if(error||!data)return;const ids=new Set(data.map(o=>o.id));
+if(SEEN===null){SEEN=ids;if(ids.size&&SND)beep();return}
+const fresh=data.filter(o=>!SEEN.has(o.id));SEEN=ids;
+if(fresh.length){if(SND)beep();const t=document.title;document.title='🔔 Novo pedido!';setTimeout(()=>{if(document.title.startsWith('🔔'))document.title=t},8000);if(tab=='pedidos')refresh(true)}
+else if(ids.size&&SND&&Date.now()-LASTB>60000)beep()}catch(e){}}
+function soundInit(){SEEN=null;sndBtn();const b=$('#snd');if(b)b.onclick=()=>{SND=!SND;try{localStorage.setItem('snd',SND?'1':'0')}catch(e){}sndBtn();if(SND)beep()};clearInterval(STM);checkNew();STM=setInterval(checkNew,15000)}
 const EDV={};const sv='<span class="msg" id="sv"></span>';
 const MSG=(t,ok)=>{const m=$('#sv');if(m){m.textContent=t;m.className='msg '+(ok?'ok':'')}};
 const slugify=n=>n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
