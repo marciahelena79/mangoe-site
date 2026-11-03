@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<title>Mangoê · Entregas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0F2A1D">
+<link rel="icon" href="../images/logo-small.webp">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&display=swap">
+<style>
+:root{--g:#0F2A1D;--y:#F5B800;--bg:#FFF6DC;--line:#E7DDB8;--ok:#2F6B2E;--red:#A3262B;box-sizing:border-box}
+*{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:#222;font:500 16px "DM Sans",system-ui,sans-serif}
+header{background:var(--g);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px}
+header b{font-size:18px;flex:1}header small{opacity:.8;font-weight:500}
+main{max-width:560px;margin:0 auto;padding:14px 14px 40px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card.done{opacity:.6}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.n{font-weight:700;font-size:18px}.st{font-size:12px;font-weight:700;border-radius:99px;padding:4px 10px;background:var(--line)}
+.st.saiu_entrega{background:var(--y)}.st.entregue{background:#cfe8cc;color:var(--ok)}
+.addr{font-size:19px;font-weight:700;line-height:1.3;margin:6px 0}
+.sub{color:#555;font-size:15px;margin:2px 0}
+.pay{margin:10px 0;padding:10px 12px;border-radius:12px;font-weight:700;background:#fff3cd}
+.pay.pix{background:#e1efff}
+.items{font-size:14px;color:#555;margin:6px 0 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{flex:1;min-width:120px;text-align:center;border:0;border-radius:12px;padding:13px 10px;font:700 15px "DM Sans",sans-serif;text-decoration:none;cursor:pointer;background:var(--line);color:#222}
+.btn.p{background:var(--g);color:#fff}.btn.ok{background:var(--ok);color:#fff}.btn.go{background:var(--y);color:#222}
+.btn:disabled{opacity:.5}
+.empty{text-align:center;color:#666;padding:50px 10px}
+.msg{color:var(--red);text-align:center;padding:30px 10px;font-weight:700}
+h3{margin:18px 4px 8px;font-size:14px;color:#666;text-transform:uppercase;letter-spacing:.04em}
+</style></head><body>
+<header><b>Mangoê · Entregas</b><small id="up"></small></header>
+<main id="m"><p class="empty">Carregando...</p></main>
+<script>
+const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable_g4gdE7lepqwJHC1vh0E51Q_HpQCdQ6G',T=new URLSearchParams(location.search).get('k')||'';
+const $=s=>document.querySelector(s),R=v=>'R$ '+(+v).toFixed(2).replace('.',','),E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function rpc(fn,b){const r=await fetch(SB+'rpc/'+fn,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.message||'Erro')}return r.status==204?null:r.json().catch(()=>null)}
+function card(o){const ad=[o.street+', '+o.num,o.nb,'Divinópolis - MG'].join(', '),maps='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(ad),ph=String(o.phone||'').replace(/\D/g,''),wa='https://wa.me/'+(ph.length<=11?'55'+ph:ph);
+const pay=o.pay=='dinheiro'?`<div class="pay">💵 DINHEIRO: cobrar ${o.fee_pending?'(entrega a combinar) ':''}${R(o.total)}</div>`:o.pay=='pix'?'<div class="pay pix">Pix: confira se o pagamento foi feito</div>':'';
+const lab={em_preparo:'Preparando',saiu_entrega:'Saiu para entrega',entregue:'Entregue'}[o.status]||o.status;
+const act=o.status=='em_preparo'?`<button class="btn go" data-id="${o.id}" data-st="saiu_entrega">Saí para entrega</button>`:o.status=='saiu_entrega'?`<button class="btn ok" data-id="${o.id}" data-st="entregue">Marcar como entregue</button>`:'';
+return `<div class="card ${o.status=='entregue'?'done':''}"><div class="top"><span class="n">Pedido #${o.number}</span><span class="st ${o.status}">${lab}</span></div>
+<div class="addr">${E(o.street)}, nº ${E(o.num)}<br>${E(o.nb)}</div>
+${o.comp?`<div class="sub">Compl.: ${E(o.comp)}</div>`:''}${o.ref?`<div class="sub">Ref.: ${E(o.ref)}</div>`:''}
+<div class="sub"><b>${E(o.name)}</b></div>
+<div class="items">${(o.items||[]).map(E).join('<br>')}</div>${pay}
+<div class="row"><a class="btn p" href="${maps}" target="_blank" rel="noopener">🧭 Abrir rota</a><a class="btn" href="tel:+${ph.length<=11?'55'+ph:ph}">📞 Ligar</a><a class="btn" href="${wa}" target="_blank" rel="noopener">WhatsApp</a></div>
+${act?`<div class="row">${act}</div>`:''}</div>`}
+async function load(){if(!T){$('#m').innerHTML='<p class="msg">Link incompleto. Peça o link correto.</p>';return}
+try{const l=await rpc('courier_orders',{t:T}),at=l.filter(o=>o.status!='entregue'),dn=l.filter(o=>o.status=='entregue');
+$('#m').innerHTML=(at.length?at.map(card).join(''):'<p class="empty">Nenhuma entrega no momento.<br>Esta tela atualiza sozinha.</p>')+(dn.length?'<h3>Entregues hoje</h3>'+dn.map(card).join(''):'');
+$('#up').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}catch(e){$('#m').innerHTML='<p class="msg">'+E(e.message)+'</p>'}}
+$('#m').onclick=async e=>{const b=e.target.closest('button[data-st]');if(!b)return;if(b.dataset.st=='entregue'&&!confirm('Confirmar que o pedido foi entregue?'))return;b.disabled=true;try{await rpc('courier_set',{t:T,p_id:b.dataset.id,st:b.dataset.st})}catch(x){alert(x.message)}load()};
+load();setInterval(load,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+</script></body></html>
