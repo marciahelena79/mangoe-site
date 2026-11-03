@@ -50,7 +50,8 @@ ${o.comp?`<div class="sub">Compl.: ${E(o.comp)}</div>`:''}${o.ref?`<div class="s
 ${act?`<div class="row">${act}</div>`:''}</div>`}
 async function load(){if(!T){$('#m').innerHTML='<p class="msg">Link incompleto. Peça o link correto.</p>';return}
 try{const l=await rpc('courier_orders',{t:T}),at=l.filter(o=>o.status!='entregue'),dn=l.filter(o=>o.status=='entregue');
-$('#m').innerHTML=(at.length?at.map(card).join(''):'<p class="empty">Nenhuma entrega no momento.<br>Esta tela atualiza sozinha.</p>')+(dn.length?'<h3>Entregues hoje</h3>'+dn.map(card).join(''):'');
+const hj=new Date().toDateString(),dh=dn.filter(o=>new Date(o.created_at).toDateString()==hj),sm=dh.reduce((x,o)=>x+(+o.fee||0),0);
+$('#m').innerHTML=`<div class="card" style="background:var(--g);color:#fff;border:0"><div style="font-size:13px;opacity:.85">Taxas de entrega de hoje</div><div style="font-size:30px;font-weight:700;margin:2px 0">${R(sm)}</div><div style="font-size:14px;opacity:.85">${dh.length} entrega(s) concluída(s)</div></div>`+(at.length?at.map(card).join(''):'<p class="empty">Nenhuma entrega no momento.<br>Esta tela atualiza sozinha.</p>')+(dn.length?'<h3>Entregues hoje</h3>'+dn.map(card).join(''):'');
 $('#up').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}catch(e){$('#m').innerHTML='<p class="msg">'+E(e.message)+'</p>'}}
 $('#m').onclick=async e=>{const b=e.target.closest('button[data-st]');if(!b)return;if(b.dataset.st=='entregue'&&!confirm('Confirmar que o pedido foi entregue?'))return;b.disabled=true;try{await rpc('courier_set',{t:T,p_id:b.dataset.id,st:b.dataset.st})}catch(x){alert(x.message)}load()};
 load();setInterval(load,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
