@@ -9,17 +9,17 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--g);font:15px/1.5 "DM Sans",system-ui,sans-serif}
 h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;margin:0;line-height:1.2}
 header{background:var(--g);color:var(--cream);position:sticky;top:0;z-index:5}
-header .in{max-width:1200px;margin:auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+header .in{max-width:1760px;margin:auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 header b{font:800 20px "Bricolage Grotesque",sans-serif;margin-right:8px}
 .tabs{display:flex;gap:6px;flex:1}.tabs button,.btn{border:0;border-radius:99px;font:700 14px "DM Sans",sans-serif;padding:8px 16px;cursor:pointer}
 .tabs button{background:transparent;color:var(--cream)}.tabs .on{background:var(--y);color:var(--g)}
 a.btn{text-decoration:none;display:inline-block}.btn{background:var(--y);color:var(--g)}.btn.g{background:var(--line)}.btn.d{background:var(--red);color:#fff}.btn.s{padding:6px 12px;font-size:13px}
-main{max-width:1200px;margin:auto;padding:16px}
+main{max-width:1760px;margin:auto;padding:16px}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}.k{color:var(--mut);font-size:13px}.big{font:800 24px "Bricolage Grotesque",sans-serif}
-.two{display:grid;gap:14px;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start}@media(max-width:860px){.two{grid-template-columns:1fr}}
+.two{display:grid;gap:14px;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);align-items:start}@media(max-width:860px){.two{grid-template-columns:1fr}}
 table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:500}td.r,th.r{text-align:right}
-tr.o{cursor:pointer}tr.o:hover,tr.sel{background:var(--cream)}.sc{overflow:auto;max-height:70vh}
+tr.o{cursor:pointer}tr.o:hover,tr.sel{background:var(--cream)}.sc{overflow:auto;max-height:80vh}.btn.del{background:#fff;border:2px solid var(--red);color:var(--red);margin-top:6px}
 .b{display:inline-block;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--line)}
 .b.novo{background:var(--y)}.b.em_preparo{background:#FFD9A0}.b.saiu_entrega{background:#CBE7FF}.b.entregue{background:#CDEFD8;color:var(--ok)}.b.cancelado{background:#F6D3D0;color:var(--red)}
 select,input{font:inherit;color:var(--g);background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
@@ -85,7 +85,7 @@ entregue:'Olá, '+fn+'! Obrigado por pedir na Mangoê! 💚 Esperamos que você 
 };
 const av=AM[o.status]?`<div class="row"><a class="btn s" href="https://api.whatsapp.com/send?phone=${wa.replace('https://wa.me/','')}&text=${encodeURIComponent(AM[o.status])}" target="_blank" rel="noopener">💬 Avisar cliente: ${AV[o.status]}</a><button class="btn s g" type="button" data-t="${encodeURIComponent(AM[o.status])}" onclick="navigator.clipboard.writeText(decodeURIComponent(this.dataset.t)).then(()=>{this.textContent='Copiado!'})">Copiar mensagem</button></div>`:'';
 d.innerHTML=`<div class="card"><h2>Pedido #${o.number} <span class="b ${o.status}">${ST[o.status]}</span></h2><p class="k">${dt(o.created_at)}${o.source=='whatsapp'?' · pedido manual (WhatsApp)':''}</p>${o.payment_method=='dinheiro'&&o.change_for?`<div class="trb">💵 Troco para ${R(o.change_for)}: devolver ${R(o.change_for-o.total)}</div>`:''}
-<p class="k" style="margin:10px 0 6px">Mudar estado:</p><div class="row">${Object.entries(ST).map(([k,v])=>`<button class="btn ${o.status==k?'':'g'} ${k=='cancelado'?'d':''}" data-st="${k}">${v}</button>`).join('')}</div><p class="msg" id="dm"></p>
+<p class="k" style="margin:10px 0 6px">Mudar estado:</p><div class="row">${Object.entries(ST).map(([k,v])=>`<button class="btn ${o.status==k?'':'g'} ${k=='cancelado'?'d':''}" data-st="${k}">${v}</button>`).join('')}</div><div class="row"><button class="btn s del" id="dlo" type="button">Excluir pedido da lista</button></div><p class="msg" id="dm"></p>
 ${dl}${av}
 <div class="prep"><h3>Para preparar</h3>${o.order_items.map(i=>`<div class="bi"><span class="bq">${i.qty}×</span><div><div class="bn">${esc(i.product_name)} ${i.size_ml} ml</div>${i.maturation?`<div class="bf">Ponto: ${esc(i.maturation)}</div>`:''}${(i.toppings||[]).length?`<div class="bf">Temperos:</div><ul class="tl">${i.toppings.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<div class="bf">Sem tempero</div>'}${i.note?`<div class="bo">OBS: ${esc(i.note)}</div>`:''}</div><span class="bp">${R(i.qty*i.unit_price)}</span></div>`).join('')}<div class="dsp ${o.disposables===true?'y':o.disposables===false?'n':'u'}">🍴 Descartáveis: ${o.disposables===true?'SIM, enviar':o.disposables===false?'NÃO, dispensa':'não informado'}</div></div>
 <p><b>${esc(o.customer_name)}</b><br><a href="${wa}" target="_blank" rel="noopener">${esc(ph)} · abrir no WhatsApp</a></p>
@@ -93,6 +93,7 @@ ${o.delivery_type=='entrega'?`<p><b>Entrega</b><br>${esc(o.street)}, nº ${esc(o
 <p style="margin-top:10px">Potes: ${R(o.items_total)}<br>Entrega: ${o.delivery_type!='entrega'?'—':o.delivery_fee==null?'<b>a combinar</b>':+o.delivery_fee===0?'Grátis':R(o.delivery_fee)}<br><b>Total: ${R(o.total)}</b><br>Pagamento: ${o.payment_method=='pix'?'Pix':o.payment_method=='dinheiro'?'Dinheiro':'—'}${o.payment_method=='dinheiro'?(o.change_for?` · <b>TROCO para ${R(o.change_for)}</b> (devolver ${R(o.change_for-o.total)})`:' · sem troco'):''}</p>
 <div class="row">${o.fee_pending&&o.delivery_type=='entrega'?'<button class="btn s" data-a="fee">Definir taxa de entrega</button>':''}</div>
 </div>`;
+$('#dlo').onclick=async()=>{if(!confirm('Excluir o pedido #'+o.number+' ('+o.customer_name+') definitivamente? Ele sai das listas e dos totais de faturamento. Isso não pode ser desfeito.'))return;const{error}=await sb.from('orders').delete().eq('id',o.id);if(error)$('#dm').textContent=error.message;else{sel=null;refresh()}};
 d.querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{if(b.dataset.st=='cancelado'&&!confirm('Cancelar este pedido?'))return;const{error}=await sb.from('orders').update({status:b.dataset.st}).eq('id',o.id);if(error)$('#dm').textContent=error.message;else refresh()});
 const fb=d.querySelector('[data-a=fee]');if(fb)fb.onclick=async()=>{const v=prompt('Valor da taxa de entrega (ex.: 12,00):');if(v===null)return;const f=parseFloat(v.replace(',','.'));if(!(f>=0)){$('#dm').textContent='Valor inválido';return}
 const{error}=await sb.from('orders').update({delivery_fee:f,fee_pending:false,total:+o.items_total+f}).eq('id',o.id);if(error)$('#dm').textContent=error.message;else refresh()}}
