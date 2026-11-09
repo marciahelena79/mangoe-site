@@ -143,7 +143,7 @@ const cfg=st.data?st.data.value:{},slug={},base={},top={};(pr.data||[]).forEach(
 (tc.data||[]).forEach(t=>{if(t.toppings)top[t.toppings.name]={cu:t.pack_qty>0?t.pack_price/t.pack_qty:0,d1:+t.dose_250,d2:+t.dose_500,u:+(t.usage_pct??25)}});return COST={cfg,base,top}}
 function calc(list){const C=COST,ok=list.filter(o=>o.status!='cancelado'),T={ped:ok.length,canc:list.length-ok.length,pot:0,prod:0,fee:0,fr:0,emb:0,tem:0,pend:0,ent:0},byP={},byT={},byM={},byN={},byD={};
 ok.forEach(o=>{T.prod+=+o.items_total;T.fee+=+(o.delivery_fee||0);if(o.delivery_type=='entrega'){T.ent++;if(o.delivery_fee==null)T.pend++;const k=o.neighborhood||'?';(byN[k]=byN[k]||{n:0,v:0}).n++;byN[k].v+=+(o.delivery_fee||0)}
-const dk=new Date(o.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});byD[dk]=(byD[dk]||0)+(+o.total);
+const dk=new Date(o.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});byD[dk]=(byD[dk]||0)+(+o.items_total);
 o.order_items.forEach(i=>{const k=i.product_name+' '+i.size_ml+' ml',b=C.base[i.product_slug+'|'+i.size_ml]||{fr:0,emb:0};let tc=0;(i.toppings||[]).forEach(t=>{const x=C.top[t];if(x)tc+=(i.size_ml==250?x.d1:x.d2)*x.cu;byT[t]=(byT[t]||0)+i.qty});
 const p=byP[k]=byP[k]||{q:0,v:0,c:0};p.q+=i.qty;p.v+=i.qty*i.unit_price;p.c+=i.qty*(b.fr+b.emb+tc);T.pot+=i.qty;T.fr+=i.qty*b.fr;T.emb+=i.qty*b.emb;T.tem+=i.qty*tc;if(i.maturation)byM[i.maturation]=(byM[i.maturation]||0)+i.qty})});
 T.rev=T.prod;T.imp=T.rev*((C.cfg.imp||0)+(C.cfg.outras||0))/100;T.entc=0;T.res=T.rev-T.fr-T.emb-T.tem-T.imp-T.entc;return{T,byP,byT,byM,byN,byD}}
