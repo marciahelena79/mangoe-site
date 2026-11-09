@@ -111,7 +111,7 @@ $('#cart').innerHTML=cart.length?cart.map((i,x)=>`<div class="item"><div><b>${i.
 const f=fee(),en=$('#ent').value=='Entrega';$('#fee').textContent=!en?'Retirada, sem taxa':f===null?'A combinar':f===0?'Grátis':R(f);$('#total').textContent=R(tot+(f||0))+(en&&f===null?' + entrega':'');$('#send').disabled=!cart.length}
 $('#sabor').onchange=opts;
 $('#cards').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#sabor').value=b.dataset.k;opts();location.hash='pedido'};
-$('#add').onclick=()=>{const k=$('#sabor').value,m=MENU[k],t=$('#tam').value,q=Math.max(1,Math.min(50,parseInt($('#qtd').value)||1));
+$('#add').onclick=()=>{const k=$('#sabor').value,m=MENU[k],t=$('#tam').value,q=Math.max(1,Math.min(50,parseInt($('#qtd').value)||1));if(!document.querySelectorAll('#temp input:checked').length&&!confirm('Você não marcou nenhum tempero.\n\nAdicionar este item SEM tempero?'))return;
 cart.push({k,n:m.n,t,q,v:m.p[t],mat:m.mat?$('#mat').value:'',tp:[...document.querySelectorAll('#temp input:checked')].map(i=>i.value),obs:$('#obs').value.trim()});
 document.querySelectorAll('#temp input').forEach(i=>i.checked=false);$('#obs').value='';$('#qtd').value=1;draw()};
 $('#cart').onclick=e=>{const b=e.target.closest('.x');if(b){cart.splice(+b.dataset.x,1);draw()}};
@@ -127,16 +127,20 @@ fixB();if(en&&$('#bairro').value&&$('#bairro').value!=OUT&&!NB.some(n=>n.name==$
 const tel=$('#tel').value.replace(/\D/g,'');if(tel.length<10||tel.length>13){er.textContent='Informe um WhatsApp válido, com DDD.';$('#tel').focus();return}
 const outro=en&&$('#bairro').value==OUT,b=en?(outro?$('#bairroTxt').value.trim():$('#bairro').value):'',nome=$('#nome').value.trim();
 const payload={name:nome,phone:tel,type:en?'entrega':'retirada',payment:$('#pag').value,disposables:$('#desc').value,change_for:chg,street:$('#rua').value.trim(),number:$('#num').value.trim(),neighborhood:b,neighborhood_other:outro,complement:$('#comp').value.trim(),reference:$('#ref').value.trim(),items:cart.map(i=>({slug:i.k,size:+i.t,qty:i.q,mat:i.mat||null,toppings:i.tp,note:i.obs}))};
+if(en&&!confirm('Pedido para ENTREGA: será cobrada taxa de entrega.\n\nPara não pagar taxa, cancele e escolha "Retirada".\n\nConfirmar entrega?'))return;
+const sig=JSON.stringify(payload);if(!window.CREF||window.CSIG!==sig){window.CREF=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));window.CSIG=sig}payload.client_ref=window.CREF;
 btn.disabled=true;btn.textContent='Enviando...';const w=window.open('','_blank');let r=null;
-try{const res=await fetch(SB+'rpc/create_order',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p:payload})});
-if(res.ok){r=await res.json()}else{const j=await res.json().catch(()=>({}));if(res.status==400&&j.message){er.textContent=j.message;if(w)w.close();if(/fechada/i.test(j.message))load();btn.disabled=false;btn.textContent=lab;return}}}catch(e){}
+for(let n=0;n<3&&!r;n++){const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),20000);
+try{const res=await fetch(SB+'rpc/create_order',{method:'POST',signal:ac.signal,headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p:payload})});
+if(res.ok){r=await res.json()}else{const j=await res.json().catch(()=>({}));if(res.status==400&&j.message){clearTimeout(tm);er.textContent=j.message;if(w)w.close();if(/fechada/i.test(j.message))load();btn.disabled=false;btn.textContent=lab;return}}}catch(e){}
+clearTimeout(tm);if(!r&&n<2)await new Promise(z=>setTimeout(z,1500*(n+1)))}
 const tot=r?+r.items_total:cart.reduce((a,i)=>a+i.q*i.v,0),f=r?(r.fee_pending?null:+r.delivery_fee):fee(),L=['Olá, Mangoê! Quero fazer um pedido'+(r?' (nº '+r.number+')':'')+':',''];
 cart.forEach((i,x)=>L.push((x+1)+') '+i.q+'x '+i.n+' '+i.t+' ml'+(i.mat?' (ponto: '+i.mat+')':'')+' - '+R(i.q*i.v),'   Temperos: '+(i.tp.join(', ')||'sem tempero')+(i.obs?'\n   Obs: '+i.obs:'')));
 L.push('','Total dos potes: '+R(tot));
 if(en){L.push('Taxa de entrega: '+(f===null?'a combinar':f===0?'grátis':R(f)),'Total com entrega: '+R(tot+(f||0))+(f===null?' + entrega':''),'','ENTREGA','Rua: '+payload.street+', nº '+payload.number,'Bairro: '+b+' - Divinópolis/MG');if(payload.complement)L.push('Complemento: '+payload.complement);if(payload.reference)L.push('Referência: '+payload.reference)}else L.push('Vou retirar o pedido');
 L.push('','Nome: '+nome,'WhatsApp: '+$('#tel').value.trim());L.push('Pagamento: '+($('#pag').value=='pix'?'Pix':'Dinheiro'+(chg?' (troco para '+R(chg)+')':' (sem troco)')));L.push('Descartáveis: '+($('#desc').value=='sim'?'Sim':'Não'));
 const url='https://wa.me/'+WA+'?text='+encodeURIComponent(L.join('\n'));
-btn.textContent=lab;if(r){cart=[];draw()}else{btn.disabled=false;er.textContent='Atenção: seu pedido foi enviado pelo WhatsApp, mas não ficou registrado no sistema. Aguarde a confirmação pelo WhatsApp.'}
+btn.textContent=lab;if(r){cart=[];window.CREF=null;draw()}else{btn.disabled=false;er.textContent='Atenção: seu pedido foi enviado pelo WhatsApp, mas não ficou registrado no sistema. Aguarde a confirmação pelo WhatsApp.'}
 if(w)w.location=url;else location.href=url};
 const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable_g4gdE7lepqwJHC1vh0E51Q_HpQCdQ6G';
 async function q(p){const r=await fetch(SB+p,{headers:{apikey:KEY}});if(!r.ok)throw 0;return r.json()}
