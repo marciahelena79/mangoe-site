@@ -31,7 +31,7 @@ header a{text-decoration:none;font-size:14px;opacity:.9}
 section{padding:48px 0}h2{font-size:clamp(26px,5vw,34px);margin-bottom:6px}.sub{color:var(--mut);margin:0 0 22px}
 .cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
 .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
-.card h3{font-size:22px}.price{display:flex;gap:10px}.price span{flex:1;background:var(--cream);border-radius:12px;padding:8px 10px;text-align:center;font-size:14px}.price b{display:block;font-size:18px}
+.card .ph{margin:-20px -20px 4px;border-radius:20px 20px 0 0;overflow:hidden;aspect-ratio:1/1;background:#12301F}.card .ph img{width:100%;height:100%;object-fit:cover;display:block}.card h3{font-size:22px}.price{display:flex;gap:10px}.price span{flex:1;background:var(--cream);border-radius:12px;padding:8px 10px;text-align:center;font-size:14px}.price b{display:block;font-size:18px}
 .dark{background:var(--g2);color:var(--cream)}.dark .sub{color:#C9D8C8}
 .box{background:#fff;color:var(--g);border-radius:20px;padding:20px;margin-bottom:16px}
 .row{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
@@ -49,6 +49,15 @@ footer{background:var(--g);color:var(--cream);text-align:center;padding:30px 20p
 .hide{display:none}.note{font-size:13px;color:var(--mut)}
 :focus-visible{outline:2px solid var(--o);outline-offset:2px}
 .closed{position:fixed;inset:0;z-index:999;background:#1f3a22;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}.closed .bx{max-width:420px}.closed img{width:150px;max-width:60%;margin-bottom:14px}.closed h2{font:800 28px "Bricolage Grotesque",sans-serif;margin:0 0 10px}.closed p{margin:0 0 18px;line-height:1.5;font-size:17px}.closed button{font:inherit;font-weight:700;border:0;border-radius:99px;padding:12px 26px;background:#FFD23F;color:#1f3a22;cursor:pointer}
+.pixov{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.62);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto}
+.pixbx{position:relative;background:#fff;color:#222;border-radius:18px;max-width:380px;width:100%;margin:auto;padding:22px 20px 18px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.pixbx h2{margin:0 0 4px;font-size:24px;color:var(--g)}.pixbx .pk{margin:4px 0 10px;font-size:15px;color:var(--mut)}.pixbx .pk b{color:var(--g);font-size:18px}
+.pixqr{width:230px;max-width:70%;height:auto;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff}
+.pixbx textarea{width:100%;box-sizing:border-box;font:12px/1.35 monospace;border:1px solid var(--line);border-radius:10px;padding:8px;resize:none;color:#333;background:#faf8f2;margin-bottom:10px}
+.pixbx .btn{width:100%}.pst{margin:12px 0 4px;font-size:14px;color:var(--mut)}.pst.ok{color:#1f7a3a;font-weight:700;font-size:17px}
+.pixlk{display:block;margin-top:8px;font-size:14px;color:var(--g);text-decoration:underline}.pixlk.big{display:block;text-decoration:none;background:var(--y,var(--gold));color:var(--g);font-weight:700;border-radius:99px;padding:13px 16px;font-size:16px;margin-top:12px}
+.pixx{position:absolute;top:8px;right:12px;border:0;background:none;font-size:26px;line-height:1;color:var(--mut);cursor:pointer}
+.pixok{font-size:56px;line-height:1;margin:6px 0}
 </style></head><body>
 <header><div class="wrap"><img src="images/logo-small.webp" alt="Logo Mangoê"><b>Mangoê</b><a href="#cardapio">Cardápio</a><a href="#pedido">Pedido</a></div></header>
 <div class="hero"><img class="c tl" src="images/corner-tl.webp" alt=""><img class="c tr" src="images/corner-tr.webp" alt=""><img class="c bl" src="images/corner-bl.webp" alt=""><img class="c br" src="images/corner-br.webp" alt="">
@@ -100,7 +109,7 @@ function fixB(){const v=$('#bairro').value;if(v==OUT||NB.some(n=>n.name==v))retu
 function togB(){$('#bairroOutro').classList.toggle('hide',$('#bairro').value!=OUT)}
 function fee(){if($('#ent').value=='Retirada')return 0;const n=NB.find(x=>x.name==$('#bairro').value);return n?n.fee:null}
 
-function build(){$('#cards').innerHTML=Object.entries(MENU).map(([k,m])=>`<div class="card"><h3>${m.n}</h3><p>${m.d}</p><div class="price">${Object.entries(m.p).map(([t,v])=>`<span>${t} ml<b>${R(v)}</b></span>`).join('')}</div><button class="btn s g" data-k="${k}" type="button">Pedir este</button></div>`).join('');
+function build(){$('#cards').innerHTML=Object.entries(MENU).map(([k,m])=>`<div class="card">${m.i?`<div class="ph"><img src="${m.i}" alt="${m.n}" loading="lazy" onerror="this.parentNode.remove()"></div>`:''}<h3>${m.n}</h3><p>${m.d}</p><div class="price">${Object.entries(m.p).map(([t,v])=>`<span>${t} ml<b>${R(v)}</b></span>`).join('')}</div><button class="btn s g" data-k="${k}" type="button">Pedir este</button></div>`).join('');
 $('#sabor').innerHTML=Object.entries(MENU).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join('');
 $('#mat').innerHTML=MAT.map(m=>`<option>${m}</option>`).join('');
 $('#temp').innerHTML=TEMP.map((t,i)=>`<label><input type="checkbox" value="${t}"><span>${t}</span></label>`).join('');
@@ -121,6 +130,20 @@ $('#cart').onclick=e=>{const b=e.target.closest('.x');if(b){cart.splice(+b.datas
 $('#ent').onchange=()=>{$('#endBox').classList.toggle('hide',$('#ent').value=='Retirada');$('#err').textContent='';draw()};
 $('#pag').onchange=()=>{const d=$('#pag').value=='dinheiro';$('#trBox').classList.toggle('hide',!d);$('#trVal').classList.toggle('hide',!d||$('#troco').value!='sim')};$('#troco').onchange=()=>$('#trVal').classList.toggle('hide',$('#troco').value!='sim');
 $('#bairro').oninput=()=>{togB();draw()};$('#bairro').onchange=()=>{fixB();togB();draw()};
+async function pixStart(n){try{const r=await fetch('/api/pix',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number:n})});if(!r.ok)return null;const j=await r.json();return j&&(j.paid||(j.qr&&j.qr_base64))?j:null}catch(e){return null}}
+function pixShow(px,r,wa){const old=document.getElementById('pixov');if(old)old.remove();
+const ov=document.createElement('div');ov.id='pixov';ov.className='pixov';const waPaid=wa+encodeURIComponent('\n\n✅ Pix já pago pelo site');
+ov.innerHTML='<div class="pixbx"><button type="button" class="pixx" aria-label="Fechar">×</button><h2>Pague com Pix</h2><p class="pk">Pedido nº '+r.number+' · <b>'+R(px.amount||+r.total)+'</b></p><div id="pixbody"></div><p id="pixst" class="pst">Aguardando pagamento…</p><a id="pixwa" class="pixlk" href="'+wa+'" target="_blank" rel="noopener">Já paguei — enviar pedido pelo WhatsApp</a></div>';
+document.body.appendChild(ov);document.body.style.overflow='hidden';
+const body=ov.querySelector('#pixbody'),st=ov.querySelector('#pixst'),lk=ov.querySelector('#pixwa');let tm=null,dead=false;
+function close(){dead=true;clearInterval(tm);ov.remove();document.body.style.overflow=''}
+ov.querySelector('.pixx').onclick=()=>{if(ov.dataset.done||confirm('Fechar? Seu pedido já foi registrado, mas você precisa pagar o Pix para confirmar.'))close()};
+function paid(){clearInterval(tm);ov.dataset.done='1';body.innerHTML='<div class="pixok">✅</div>';st.className='pst ok';st.textContent='Pagamento confirmado! Obrigado.';lk.className='pixlk big';lk.href=waPaid;lk.textContent='Enviar pedido pelo WhatsApp'}
+function qrView(p){body.innerHTML='<img class="pixqr" alt="QR Code Pix" src="data:image/png;base64,'+p.qr_base64+'"><p class="pk">Ou copie o código e cole no app do seu banco (Pix copia e cola):</p><textarea id="pixcode" readonly rows="3"></textarea><button type="button" class="btn" id="pixcp">Copiar código Pix</button>';
+const ta=body.querySelector('#pixcode');ta.value=p.qr;body.querySelector('#pixcp').onclick=async function(){try{await navigator.clipboard.writeText(p.qr)}catch(e){ta.select();try{document.execCommand('copy')}catch(_){}}this.textContent='Código copiado ✔'};
+st.className='pst';st.textContent='Aguardando pagamento…';poll()}
+function poll(){clearInterval(tm);tm=setInterval(async()=>{if(dead)return;try{const x=await fetch('/api/pix?number='+r.number+'&t='+Date.now());const j=await x.json();if(dead)return;if(j.paid)paid();else if(j.expired){clearInterval(tm);body.innerHTML='<p class="pk">O prazo deste Pix expirou.</p><button type="button" class="btn" id="pixnew">Gerar novo Pix</button>';st.textContent='';body.querySelector('#pixnew').onclick=async function(){this.disabled=true;this.textContent='Gerando…';const n=await pixStart(r.number);if(n&&n.paid)paid();else if(n)qrView(n);else{this.disabled=false;this.textContent='Tentar novamente'}}}}catch(e){}},4000)}
+if(px.paid)paid();else qrView(px)}
 $('#send').onclick=async()=>{const er=$('#err'),en=$('#ent').value=='Entrega',btn=$('#send'),lab='Enviar pedido pelo WhatsApp';er.textContent='';
 const need=[['#nome','seu nome'],['#tel','seu WhatsApp com DDD'],['#pag','a forma de pagamento'],['#desc','se precisa de descartáveis']];
 if(en){need.push(['#rua','a rua'],['#num','o número'],['#bairro','o bairro']);if($('#bairro').value==OUT)need.push(['#bairroTxt','o nome do bairro'])}
@@ -143,12 +166,14 @@ L.push('','Total dos potes: '+R(tot));
 if(en){L.push('Taxa de entrega: '+(f===null?'a combinar':f===0?'grátis':R(f)),'Total com entrega: '+R(tot+(f||0))+(f===null?' + entrega':''),'','ENTREGA','Rua: '+payload.street+', nº '+payload.number,'Bairro: '+b+' - Divinópolis/MG');if(payload.complement)L.push('Complemento: '+payload.complement);if(payload.reference)L.push('Referência: '+payload.reference)}else L.push('Vou retirar o pedido');
 L.push('','Nome: '+nome,'WhatsApp: '+$('#tel').value.trim());L.push('Pagamento: '+($('#pag').value=='pix'?'Pix':'Dinheiro'+(chg?' (troco para '+R(chg)+')':' (sem troco)')));L.push('Descartáveis: '+($('#desc').value=='sim'?'Sim':'Não'));
 const url='https://wa.me/'+WA+'?text='+encodeURIComponent(L.join('\n'));
+let px=null;if(r&&$('#pag').value=='pix'&&!r.fee_pending){btn.textContent='Gerando Pix...';px=await pixStart(r.number)}
+if(px){if(w)w.close();btn.textContent=lab;btn.disabled=false;cart=[];window.CREF=null;draw();pixShow(px,r,url);return}
 btn.textContent=lab;if(r){cart=[];window.CREF=null;draw()}else{btn.disabled=false;er.textContent='Atenção: seu pedido foi enviado pelo WhatsApp, mas não ficou registrado no sistema. Aguarde a confirmação pelo WhatsApp.'}
 if(w)w.location=url;else location.href=url};
 const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable_g4gdE7lepqwJHC1vh0E51Q_HpQCdQ6G';
 async function q(p){const r=await fetch(SB+p,{headers:{apikey:KEY}});if(!r.ok)throw 0;return r.json()}
-async function load(){try{const[pr,ma,to,ss,nb]=await Promise.all([q('products?select=slug,name,description,has_maturation,product_prices(size_ml,price,active)&order=sort'),q('maturations?select=name&order=sort'),q('toppings?select=name&order=sort'),q('site_settings?select=key,value'),q('neighborhoods?select=name,delivery_zones(name,fee)&active=eq.true&order=name')]);
-const m={};pr.forEach(p=>{const pp={};p.product_prices.filter(x=>x.active).sort((a,b)=>a.size_ml-b.size_ml).forEach(x=>pp[x.size_ml]=+x.price);if(Object.keys(pp).length)m[p.slug]={n:p.name,d:p.description,mat:p.has_maturation,p:pp}});
+async function load(){try{const[pr,ma,to,ss,nb]=await Promise.all([q('products?select=slug,name,description,has_maturation,image_url,product_prices(size_ml,price,active)&order=sort'),q('maturations?select=name&order=sort'),q('toppings?select=name&order=sort'),q('site_settings?select=key,value'),q('neighborhoods?select=name,delivery_zones(name,fee)&active=eq.true&order=name')]);
+const m={};pr.forEach(p=>{const pp={};p.product_prices.filter(x=>x.active).sort((a,b)=>a.size_ml-b.size_ml).forEach(x=>pp[x.size_ml]=+x.price);if(Object.keys(pp).length)m[p.slug]={n:p.name,d:p.description,mat:p.has_maturation,p:pp,i:p.image_url}});
 if(Object.keys(m).length)MENU=m;if(ma.length)MAT=ma.map(x=>x.name);if(to.length)TEMP=to.map(x=>x.name);const w=ss.find(x=>x.key=='whatsapp');if(w)WA=w.value;const so=ss.find(x=>x.key=='store_open'),cm=ss.find(x=>x.key=='closed_message');closedScreen(!!so&&String(so.value).trim().toLowerCase()=='false',cm&&cm.value);NB=nb.filter(x=>x.delivery_zones).map(x=>({name:x.name,fee:x.delivery_zones.fee==null?null:+x.delivery_zones.fee}));build();draw()}catch(e){}}
 function closedScreen(c,msg){let e=document.getElementById('closed');if(!c){if(e)e.remove();document.body.style.overflow='';return}
 if(!e){e=document.createElement('div');e.id='closed';e.className='closed';e.setAttribute('role','alertdialog');document.body.appendChild(e)}
