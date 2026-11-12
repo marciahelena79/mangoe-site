@@ -111,7 +111,7 @@ $('#cart').innerHTML=cart.length?cart.map((i,x)=>`<div class="item"><div><b>${i.
 const f=fee(),en=$('#ent').value=='Entrega';$('#fee').textContent=!en?'Retirada, sem taxa':f===null?'A combinar':f===0?'Grátis':R(f);$('#total').textContent=R(tot+(f||0))+(en&&f===null?' + entrega':'');$('#send').disabled=!cart.length}
 $('#sabor').onchange=opts;
 try{history.scrollRestoration='manual'}catch(e){}
-if(!location.hash)scrollTo(0,0);
+(function(){var ext=!document.referrer||document.referrer.indexOf(location.origin)!==0;if(!location.hash||(ext&&location.hash=='#pedido')){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}scrollTo(0,0);addEventListener('load',function(){scrollTo(0,0)})}})();
 document.querySelectorAll('header a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t){const y=t.getBoundingClientRect().top+scrollY-((document.querySelector('header')||{}).offsetHeight||0);scrollTo({top:Math.max(0,y),behavior:'smooth'})}}));
 $('#cards').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#sabor').value=b.dataset.k;opts();location.hash='pedido'};
 $('#add').onclick=()=>{const k=$('#sabor').value,m=MENU[k],t=$('#tam').value,q=Math.max(1,Math.min(50,parseInt($('#qtd').value)||1));if(!document.querySelectorAll('#temp input:checked').length&&!confirm('Você não marcou nenhum tempero.\n\nAdicionar este item SEM tempero?'))return;
