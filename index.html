@@ -144,7 +144,7 @@ const ta=body.querySelector('#pixcode');ta.value=p.qr;body.querySelector('#pixcp
 st.className='pst';st.textContent='Aguardando pagamento…';poll()}
 function poll(){clearInterval(tm);tm=setInterval(async()=>{if(dead)return;try{const x=await fetch('/api/pix?number='+r.number+'&t='+Date.now());const j=await x.json();if(dead)return;if(j.paid)paid();else if(j.expired){clearInterval(tm);body.innerHTML='<p class="pk">O prazo deste Pix expirou.</p><button type="button" class="btn" id="pixnew">Gerar novo Pix</button>';st.textContent='';body.querySelector('#pixnew').onclick=async function(){this.disabled=true;this.textContent='Gerando…';const n=await pixStart(r.number);if(n&&n.paid)paid();else if(n)qrView(n);else{this.disabled=false;this.textContent='Tentar novamente'}}}}catch(e){}},4000)}
 if(px.paid)paid();else qrView(px)}
-$('#send').onclick=async()=>{const er=$('#err'),en=$('#ent').value=='Entrega',btn=$('#send'),lab='Enviar pedido pelo WhatsApp';er.textContent='';
+$('#send').onclick=async()=>{const er=$('#err'),en=$('#ent').value=='Entrega',btn=$('#send'),lab=sendLabel();er.textContent='';
 const need=[['#nome','seu nome'],['#tel','seu WhatsApp com DDD'],['#pag','a forma de pagamento'],['#desc','se precisa de descartáveis']];
 if(en){need.push(['#rua','a rua'],['#num','o número'],['#bairro','o bairro']);if($('#bairro').value==OUT)need.push(['#bairroTxt','o nome do bairro'])}
 const miss=need.filter(x=>!$(x[0]).value.trim());if(miss.length){er.textContent='Informe '+miss.map(x=>x[1]).join(', ')+'.';$(miss[0][0]).focus();return}
@@ -170,6 +170,9 @@ let px=null;if(r&&$('#pag').value=='pix'&&!r.fee_pending){btn.textContent='Geran
 if(px){if(w)w.close();btn.textContent=lab;btn.disabled=false;cart=[];window.CREF=null;draw();pixShow(px,r,url);return}
 btn.textContent=lab;if(r){cart=[];window.CREF=null;draw()}else{btn.disabled=false;er.textContent='Atenção: seu pedido foi enviado pelo WhatsApp, mas não ficou registrado no sistema. Aguarde a confirmação pelo WhatsApp.'}
 if(w)w.location=url;else location.href=url};
+function sendLabel(){const en=$('#ent').value=='Entrega';return $('#pag').value=='pix'&&(!en||fee()!==null)?'Gerar Pix para pagar':'Enviar pedido pelo WhatsApp'}
+function refLab(){const b=$('#send');if(b&&!/^(Gerando|Enviando)/.test(b.textContent))b.textContent=sendLabel()}
+['#pag','#ent','#bairro','#bairroTxt'].forEach(s=>{const e=$(s);if(e){e.addEventListener('change',refLab);e.addEventListener('input',refLab)}});
 const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable_g4gdE7lepqwJHC1vh0E51Q_HpQCdQ6G';
 async function q(p){const r=await fetch(SB+p,{headers:{apikey:KEY}});if(!r.ok)throw 0;return r.json()}
 async function load(){try{const[pr,ma,to,ss,nb]=await Promise.all([q('products?select=slug,name,description,has_maturation,image_url,product_prices(size_ml,price,active)&order=sort'),q('maturations?select=name&order=sort'),q('toppings?select=name&order=sort'),q('site_settings?select=key,value'),q('neighborhoods?select=name,delivery_zones(name,fee)&active=eq.true&order=name')]);
