@@ -177,11 +177,13 @@ const SB='https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/',KEY='sb_publishable
 async function q(p){const r=await fetch(SB+p,{headers:{apikey:KEY}});if(!r.ok)throw 0;return r.json()}
 async function load(){try{const[pr,ma,to,ss,nb]=await Promise.all([q('products?select=slug,name,description,has_maturation,image_url,product_prices(size_ml,price,active)&order=sort'),q('maturations?select=name&order=sort'),q('toppings?select=name&order=sort'),q('site_settings?select=key,value'),q('neighborhoods?select=name,delivery_zones(name,fee)&active=eq.true&order=name')]);
 const m={};pr.forEach(p=>{const pp={};p.product_prices.filter(x=>x.active).sort((a,b)=>a.size_ml-b.size_ml).forEach(x=>pp[x.size_ml]=+x.price);if(Object.keys(pp).length)m[p.slug]={n:p.name,d:p.description,mat:p.has_maturation,p:pp,i:p.image_url}});
-if(Object.keys(m).length)MENU=m;if(ma.length)MAT=ma.map(x=>x.name);if(to.length)TEMP=to.map(x=>x.name);const w=ss.find(x=>x.key=='whatsapp');if(w)WA=w.value;const so=ss.find(x=>x.key=='store_open'),cm=ss.find(x=>x.key=='closed_message');closedScreen(!!so&&String(so.value).trim().toLowerCase()=='false',cm&&cm.value);NB=nb.filter(x=>x.delivery_zones).map(x=>({name:x.name,fee:x.delivery_zones.fee==null?null:+x.delivery_zones.fee}));build();draw()}catch(e){}}
+if(Object.keys(m).length)MENU=m;if(ma.length)MAT=ma.map(x=>x.name);if(to.length)TEMP=to.map(x=>x.name);const w=ss.find(x=>x.key=='whatsapp');if(w)WA=w.value;const so=ss.find(x=>x.key=='store_open'),cm=ss.find(x=>x.key=='closed_message');stateCheck();NB=nb.filter(x=>x.delivery_zones).map(x=>({name:x.name,fee:x.delivery_zones.fee==null?null:+x.delivery_zones.fee}));build();draw()}catch(e){}}
 function closedScreen(c,msg){let e=document.getElementById('closed');if(!c){if(e)e.remove();document.body.style.overflow='';return}
 if(!e){e=document.createElement('div');e.id='closed';e.className='closed';e.setAttribute('role','alertdialog');document.body.appendChild(e)}
 const t=document.createElement('div');t.className='bx';t.innerHTML='<img src="images/logo.webp" alt="Mangoê"><h2>Estamos fechados</h2><p></p><button type="button">Voltar</button>';t.querySelector('p').textContent=msg||'Estamos fechados no momento. Volte mais tarde!';
 t.querySelector('button').onclick=()=>{if(history.length>1)history.back();else location.reload()};e.replaceChildren(t);document.body.style.overflow='hidden'}
+async function stateCheck(){try{const r=await fetch(SB+'rpc/store_state',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:'{}'});if(!r.ok)return;const s=await r.json();closedScreen(!s.open,s.message)}catch(e){}}
+setInterval(stateCheck,60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
-build();draw();load();
+build();draw();load();stateCheck();
 </script></body></html>
