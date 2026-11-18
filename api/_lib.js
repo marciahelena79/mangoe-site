@@ -3,15 +3,22 @@ const STORES = {
   mangoe: { name: 'Mangoê', host: 'mangoe.vercel.app', sb: 'https://uwwrzpzjwcegonrntbio.supabase.co/rest/v1/rpc/pix_api', key: 'sb_publishable_g4gdE7lepqwJHC1vh0E51Q_HpQCdQ6G' },
   bistro: { name: 'DonaLia Bistrô', host: 'donalia-bistro.vercel.app', sb: 'https://lwicspulohwiniobupib.supabase.co/rest/v1/rpc/pix_api', key: 'sb_publishable_fGRKerLUJblNN6WKb8m76g_6wnm2uiz' }
 };
+// Sem conexão direta com o Postgres: tudo passa por HTTPS (PostgREST -> pooler do Supabase).
+// O fetch nativo do Node reaproveita conexões (keep-alive) entre invocações da mesma instância;
+// o timeout evita que uma chamada travada prenda a função e acumule requisições.
+function tfetch(url, opts, ms) {
+  const ac = new AbortController(); const t = setTimeout(() => ac.abort(), ms || 8000);
+  return fetch(url, Object.assign({}, opts, { signal: ac.signal })).finally(() => clearTimeout(t));
+}
 async function db(store, p) {
   const s = STORES[store];
-  const r = await fetch(s.sb, { method: 'POST', headers: { apikey: s.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: Object.assign({ secret: process.env.PIX_SECRET }, p) }) });
+  const r = await tfetch(s.sb, { method: 'POST', headers: { apikey: s.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: Object.assign({ secret: process.env.PIX_SECRET }, p) }) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) { const e = new Error(j.message || 'db ' + r.status); e.status = r.status; throw e; }
   return j;
 }
 async function mp(path, opts) {
-  const r = await fetch('https://api.mercadopago.com' + path, Object.assign({}, opts, { headers: Object.assign({ Authorization: 'Bearer ' + process.env.MP_ACCESS_TOKEN, 'Content-Type': 'application/json', accept: 'application/json' }, (opts && opts.headers) || {}) }));
+  const r = await tfetch('https://api.mercadopago.com' + path, Object.assign({}, opts, { headers: Object.assign({ Authorization: 'Bearer ' + process.env.MP_ACCESS_TOKEN, 'Content-Type': 'application/json', accept: 'application/json' }, (opts && opts.headers) || {}) }));
   const j = await r.json().catch(() => ({}));
   return { ok: r.ok, status: r.status, data: j };
 }
